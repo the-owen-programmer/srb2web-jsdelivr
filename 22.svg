@@ -1599,15 +1599,18 @@
         // TODO checkServer -- check for internet connection
         return InstallProgram(full, version, true, (name, curVal, maxVal) => {
           // Progress callback
-          let percent = Math.round(curVal/maxVal*100);
+          let percent = 0;
+          if (Number.isFinite(maxVal) && maxVal > 0)
+            percent = Math.round(curVal/maxVal*100);
           if (typeof name === 'undefined') {
-            console.log(`InstallProgram: Finished install (${curVal}/${maxVal}`);
+            console.log(`InstallProgram: Finished install (${curVal}/${maxVal})`);
             StatusElement.innerText = `Finishing...`;
           } else {
             console.log(`InstallProgram: Retrieving ${name} (${curVal}/${maxVal})`)
             StatusElement.innerText = `Retrieving ${name.split('/').pop()}...`;
           }
-          ProgressElement.value = percent;
+          if (ProgressElement)
+            ProgressElement.value = percent;
         },
         () => {
           // Finished callback
