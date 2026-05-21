@@ -339,7 +339,7 @@
                 <span id="packageVersionRow">
                   <label for="packageVersion">Version</label>
                   <select id="packageVersion">
-                    <option value="2.2.4" selected>2.2.4</option>
+                    <option value="2.2.4" selected="">2.2.4</option>
 <option value="2.2.4-lowend">2.2.4-lowend</option>
                   </select>
                 </span>
