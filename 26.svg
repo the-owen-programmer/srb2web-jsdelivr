@@ -1542,8 +1542,11 @@
               // Add entry to file list
               textLines.forEach(line => {
                 let lineTrim = line.trim();
-                if (lineTrim && !lineTrim.startsWith('//'))
+                if (lineTrim && !lineTrim.startsWith('//')) {
+                  if (name === 'INSTALL' && lineTrim.startsWith('_music.dta/'))
+                    return; // _music.dta entries are package internals and are not separate CDN files
                   fileLists[name].push(lineTrim);
+                }
               });
             }
           } catch (e) {
