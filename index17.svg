@@ -1,8 +1,8 @@
-<svg xmlns="http://w3.org" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
   
   <!-- 1. The HTML Container inside SVG -->
   <foreignObject x="0" y="0" width="100%" height="100%">
-    <html xmlns="http://w3.org">
+    <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.3.0/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.10.1/Sortable.min.js"></script>
@@ -2117,15 +2117,12 @@
         /* ]]> */
     </script>
     <!-- {{{ SCRIPT }}} -->
-  </body>
-</html>
-
             <!-- 2. The Fix Script -->
         <script type="text/javascript">
   /* <![CDATA[ */
           (function() {
             // Create a real HTML head element
-            var ns = "http://w3.org";
+            var ns = "http://www.w3.org/1999/xhtml";
             var head = document.createElementNS(ns, "head");
             
             // Insert it into the body
