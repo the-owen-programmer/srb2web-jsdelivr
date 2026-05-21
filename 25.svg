@@ -616,7 +616,7 @@
         return false;
       };
 
-      var URLParams;
+      var URLParams = new URLSearchParams(window.location.search);
 
       var GetSelectedPackageVersion = _ => {
         let val = '';
@@ -689,6 +689,8 @@
       };
 
       var SaveFormToStorage = (form) => {
+        if (!URLParams)
+          URLParams = new URLSearchParams(window.location.search);
         let inputs = form.querySelectorAll('input, textarea, select');
         inputs.forEach(input => {
           let val = input.type === 'checkbox' ? input.checked
@@ -702,6 +704,8 @@
       };
 
       var LoadFormFromStorage = (form) => {
+        if (!URLParams)
+          URLParams = new URLSearchParams(window.location.search);
         let inputs = form.querySelectorAll('input, textarea, select');
         inputs.forEach(input => {
           let val;
@@ -727,6 +731,8 @@
       };
 
       var HandleInput = (e) => {
+        if (!URLParams)
+          URLParams = new URLSearchParams(window.location.search);
         let val = e.target.type === 'checkbox' ? e.target.checked
                   : e.target.type === 'select-one' ? (e.target.selectedIndex > -1 ? e.target.options[e.target.selectedIndex].value : '')
                   : e.target.value
@@ -973,7 +979,10 @@
               localStorage.setItem('srb2web_authorUpdate_id', updateId);
               localStorage.setItem('srb2web_authorUpdate', updateCount.toString());
             } catch (err) { 
-              console.log('CheckVersion: author update check', err);
+              if (typeof err === 'string' && err.includes('status: 404'))
+                console.debug('CheckVersion author update not found');
+              else
+                console.log('CheckVersion: author update check', err);
             }
           }
 
@@ -1287,6 +1296,8 @@
       var VersionBases = {};
 
       var CompositeKey = (fn, version) => `data/${version}/${fn}`;
+      var CDNBaseUrl = 'https://cdn.jsdelivr.net/gh/the-owen-programmer/srb2web-jsdelivr/';
+      var CDNPath = (path) => new URL(StripLeadingSeparators(path), CDNBaseUrl).href;
 
       var StripLeadingSeparators = (fn) => fn.replace(/^\/*/, '');
 
@@ -1347,14 +1358,27 @@
         }));
       };
 
+      var GitHubRawUrl = (path) => `https://raw.githubusercontent.com/the-owen-programmer/srb2web-jsdelivr/main/${path}`;
+      var FetchWithGitHubBackup = async (path) => {
+        let response = await fetch(CDNPath(path));
+        if (response.ok)
+          return response;
+        console.warn(`Primary fetch failed for ${path} (${response.status}); trying GitHub raw backup.`);
+        let backupResponse = await fetch(GitHubRawUrl(path));
+        if (backupResponse.ok)
+          return backupResponse;
+        console.warn(`GitHub raw fetch failed for ${path} (${backupResponse.status});`);
+        return backupResponse;
+      };
+
       var InstallProgramFile = async (name, version, md5 = null, fullBase = []) => {
         let customStore = new idbKeyval.Store('SRB2_DATA', 'FILES', 1);
 
         try {
-          let remoteFile = await fetch(`data/${version}/${name}`);
+          let remoteFile = await FetchWithGitHubBackup(`data/${version}/${name}`);
 
           if (!remoteFile.ok)
-            throw remoteFile;
+            throw `${remoteFile.status} ${remoteFile.statusText}`;
           
           remoteFile = await remoteFile.arrayBuffer();
           remoteFile = new Uint8Array(remoteFile);
@@ -1408,8 +1432,17 @@
 
         try {
           // Check server's MD5 file for the current version.
-          let remoteMd5 = await fetch(`data/${version}/${name}.md5`);
+          let remoteMd5 = await FetchWithGitHubBackup(`data/${version}/${name}.md5`);
           if (!remoteMd5.ok) {
+            // Server's MD5 was not found or unavailable. Try direct file download
+            // when the .md5 is blocked by the CDN.
+            if (remoteMd5.status === 403 || remoteMd5.status === 404) {
+              try {
+                return await InstallProgramFile(name, version, null, fullBase);
+              } catch (err) {
+                console.warn(`InstallProgramFile fallback failed for ${name} (${version}):`, err);
+              }
+            }
             // Server's MD5 was not found: check the "base" version for the file.
             if (base && base.length && base[0])
               return await CheckInstallProgramFile(name, base.shift(), base, fullBase, checkMd5IfFileExists);
@@ -1545,7 +1578,7 @@
                 break; // no circular references, thanks
             } else {
               // If IDB doesn't have the BASE, then check the server
-              childBaseVer = await fetch(`data/${baseVer}/BASE`);
+              childBaseVer = await FetchWithGitHubBackup(`data/${baseVer}/BASE`);
               if (!childBaseVer.ok)
                 // assume no base version, but don't store anything
                 // in case this was an error.
@@ -1593,15 +1626,18 @@
         // TODO checkServer -- check for internet connection
         return InstallProgram(full, version, true, (name, curVal, maxVal) => {
           // Progress callback
-          let percent = Math.round(curVal/maxVal*100);
+          let percent = 0;
+          if (Number.isFinite(maxVal) && maxVal > 0)
+            percent = Math.round(curVal/maxVal*100);
           if (typeof name === 'undefined') {
-            console.log(`InstallProgram: Finished install (${curVal}/${maxVal}`);
+            console.log(`InstallProgram: Finished install (${curVal}/${maxVal})`);
             StatusElement.innerText = `Finishing...`;
           } else {
             console.log(`InstallProgram: Retrieving ${name} (${curVal}/${maxVal})`)
             StatusElement.innerText = `Retrieving ${name.split('/').pop()}...`;
           }
-          ProgressElement.value = percent;
+          if (ProgressElement)
+            ProgressElement.value = percent;
         },
         () => {
           // Finished callback
