@@ -504,6 +504,45 @@
       var ControlsFormElement = document.getElementById('controlsForm');
       var PackageVersionElement = document.getElementById('packageVersion');
       var AddonFields = 0;
+
+      var GetDocumentBody = () => document.body || document.querySelector('body');
+      var GetDocumentHead = () => {
+        if (document.head)
+          return document.head;
+        var head = document.querySelector('head');
+        if (!head) {
+          var ns = 'http://www.w3.org/1999/xhtml';
+          head = document.createElementNS(ns, 'head');
+          var body = GetDocumentBody();
+          if (body)
+            body.prepend(head);
+        }
+        Object.defineProperty(document, 'head', {
+          get: function() { return head; },
+          configurable: true
+        });
+        return head;
+      };
+
+      var LoadExternalScript = (src) => new Promise((resolve, reject) => {
+        let script = document.createElement('script');
+        script.src = src;
+        script.async = false;
+        script.onload = resolve;
+        script.onerror = reject;
+        GetDocumentHead().appendChild(script);
+      });
+
+      var EnsureSortableReady = async () => {
+        if (typeof Sortable !== 'undefined')
+          return;
+        try {
+          await LoadExternalScript('https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.10.1/Sortable.min.js');
+        } catch (err) {
+          console.error('Sortable load failed:', err);
+        }
+      };
+
       var DebugLogs = [];
       var RealConsole = {
         log: console.log.bind(console),
@@ -630,8 +669,10 @@
         let scriptSrc = `data/${PackageVersion}/srb2.js`;
         let script = document.createElement('script');
         script.setAttribute('src',scriptSrc);
-        document.head.appendChild(script);
-        document.body.classList.add('calledRun');
+        GetDocumentHead().appendChild(script);
+        let body = GetDocumentBody();
+        if (body)
+          body.classList.add('calledRun');
       };
 
       var DrawDistanceRange = ['256','512','768','1024','1536','2048','3072','4096','6144','8192','Infinite'];
@@ -801,15 +842,20 @@
         }
       };
 
-      var InitializeAddons = () => {
+      var InitializeAddons = async () => {
+        await EnsureSortableReady();
         AddAddonField();
         document.getElementById("addonButtonAdd").addEventListener('click', AddAddonField, false);
-        Sortable.create(document.getElementById('addonFilesContainer'), {
-          onEnd: () => {
-            BuildControlArguments();
-            document.getElementById("systemArguments").value = SystemArgumentsToString();
-          }
-        });
+        if (typeof Sortable !== 'undefined') {
+          Sortable.create(document.getElementById('addonFilesContainer'), {
+            onEnd: () => {
+              BuildControlArguments();
+              document.getElementById("systemArguments").value = SystemArgumentsToString();
+            }
+          });
+        } else {
+          console.warn('Sortable unavailable; addon drag ordering will be disabled.');
+        }
       };
 
       var InitializeSections = () => {
@@ -836,9 +882,9 @@
         }, false);
       };
 
-      window.addEventListener('load', function() {
+      window.addEventListener('load', async function() {
         if (!InitializeiOSLanding()) {
-          InitializeAddons();
+          await InitializeAddons();
           InitializeFormFields();
           InitializeSections();
         }
@@ -851,7 +897,8 @@
       let AuthorUpdateShown = false;
 
       var CheckVersion = async () => {
-        if (document.body.classList.contains('calledRun'))
+        let body = GetDocumentBody();
+        if (body && body.classList.contains('calledRun'))
           return;
 
         try {
@@ -1765,7 +1812,9 @@
       var StartedMainLoopCallback = () => {
         document.getElementById('canvas').style.zIndex = "9999";
         document.getElementById('canvas').style.opacity = "1.0";
-        document.body.classList.add('startedMainLoop');
+        let body = GetDocumentBody();
+        if (body)
+          body.classList.add('startedMainLoop');
         StartedMainLoop = true;
         // go scorched earth to save memory
         DeleteNode(document.getElementById('content'));
