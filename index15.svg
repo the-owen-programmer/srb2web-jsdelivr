@@ -403,7 +403,7 @@
     <textarea id="keyCapture" oncontextmenu="event.preventDefault()" tabindex="-1"></textarea>
 
     <form id="textForm" onsubmit="InjectText();" action="javascript:void(0);" autocomplete="off">
-      <input id="textCapture" tabindex="-1" placeholder="Console Command" disabled></input>
+      <input id="textCapture" tabindex="-1" placeholder="Console Command" disabled=""></input>
       <input id="textSubmit" type="submit" value="Enter"></input>
     </form>
 
