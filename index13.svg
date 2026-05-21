@@ -348,7 +348,7 @@
               </p>
               <p>
                 <label for="userArguments">Command Line</label><br></br>
-                <textarea id="systemArguments" rows="2" readonly></textarea><br></br>
+                <textarea id="systemArguments" rows="2" readonly=""></textarea><br></br>
                 <textarea id="userArguments" rows="2" placeholder="Custom Arguments"></textarea>
               </p>
             </details>
