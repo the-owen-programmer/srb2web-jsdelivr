@@ -408,6 +408,7 @@
     </form>
 
     <script type='text/javascript'>
+        /* <![CDATA[ */
       ////////////////////////////////
       // UI
       ////////////////////////////////
@@ -2113,6 +2114,7 @@
         document.addEventListener('keyup', CaptureFullscreenKey, true);
         document.addEventListener('keypress', CaptureFullscreenKey, true);
       }, {once:true});
+        /* ]]> */
     </script>
     <!-- {{{ SCRIPT }}} -->
   </body>
