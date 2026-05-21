@@ -248,6 +248,79 @@
       #androidNotice {
         display: none;
       }
+
+      #debugToggle {
+        position: fixed;
+        bottom: 0.75em;
+        right: 0.75em;
+        z-index: 100000;
+        padding: 0.5em 0.75em;
+        background: rgba(0, 0, 0, 0.85);
+        color: #fff;
+        border: 1px solid #666;
+        border-radius: 5px;
+        font-size: 0.85em;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      #debugOverlay {
+        position: fixed;
+        bottom: 3.75em;
+        right: 0.75em;
+        width: min(90vw, 560px);
+        max-height: 60vh;
+        background: rgba(12, 12, 12, 0.96);
+        border: 1px solid #555;
+        border-radius: 8px;
+        box-shadow: 0 0 24px rgba(0, 0, 0, 0.8);
+        color: #fff;
+        font-family: monospace;
+        display: flex;
+        flex-direction: column;
+        z-index: 100000;
+      }
+
+      #debugOverlay[hidden] {
+        display: none;
+      }
+
+      #debugOverlay header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.6em 0.75em;
+        border-bottom: 1px solid #444;
+        background: rgba(20, 20, 20, 0.95);
+      }
+
+      #debugOverlay header span {
+        font-weight: bold;
+        font-size: 0.95em;
+      }
+
+      #debugOverlay header button {
+        margin-left: 0.4em;
+        padding: 0.3em 0.6em;
+        border: 1px solid #666;
+        border-radius: 4px;
+        background: rgba(30, 30, 30, 0.95);
+        color: #fff;
+        cursor: pointer;
+      }
+
+      #debugOutput {
+        flex: 1;
+        margin: 0;
+        padding: 0.75em;
+        overflow: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+        background: transparent;
+        color: #e5e5e5;
+        font-size: 0.78em;
+        line-height: 1.3em;
+      }
     </style>
   </head>
   <body>
@@ -398,6 +471,18 @@
       </div>
     </div>
     
+    <div id="debugToggle" onclick="ToggleDebugPanel()">Debug Logs</div>
+    <div id="debugOverlay" hidden="">
+      <header>
+        <span>Debug Console</span>
+        <div>
+          <button type="button" onclick="ClearDebugLogs()">Clear</button>
+          <button type="button" onclick="ToggleDebugPanel(false)">Close</button>
+        </div>
+      </header>
+      <pre id="debugOutput"></pre>
+    </div>
+
     <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1" style="z-index:-9999;"></canvas>
 
     <textarea id="keyCapture" oncontextmenu="event.preventDefault()" tabindex="-1"></textarea>
@@ -419,6 +504,69 @@
       var ControlsFormElement = document.getElementById('controlsForm');
       var PackageVersionElement = document.getElementById('packageVersion');
       var AddonFields = 0;
+      var DebugLogs = [];
+      var RealConsole = {
+        log: console.log.bind(console),
+        warn: console.warn.bind(console),
+        error: console.error.bind(console)
+      };
+
+      var AppendDebugLog = function(level, args) {
+        try {
+          let message = Array.from(args).map(arg => {
+            if (arg instanceof Error)
+              return `${arg.name}: ${arg.message}\n${arg.stack || ''}`;
+            if (typeof arg === 'object') {
+              try { return JSON.stringify(arg); } catch (err) { return String(arg); }
+            }
+            return String(arg);
+          }).join(' ');
+          let timestamp = new Date().toISOString().slice(11, 23);
+          let entry = `[${timestamp}] ${level}: ${message}`;
+          DebugLogs.push(entry);
+          let output = document.getElementById('debugOutput');
+          if (output) {
+            output.textContent += entry + '\n';
+            output.scrollTop = output.scrollHeight;
+          }
+        } catch (e) {
+          RealConsole.error('AppendDebugLog failed:', e);
+        }
+      };
+
+      console.log = function(...args) {
+        RealConsole.log(...args);
+        AppendDebugLog('LOG', args);
+      };
+      console.warn = function(...args) {
+        RealConsole.warn(...args);
+        AppendDebugLog('WARN', args);
+      };
+      console.error = function(...args) {
+        RealConsole.error(...args);
+        AppendDebugLog('ERROR', args);
+      };
+
+      window.addEventListener('error', function(event) {
+        AppendDebugLog('ERROR', [event.message || event.toString(), event.filename, event.lineno, event.colno]);
+      }, true);
+
+      window.addEventListener('unhandledrejection', function(event) {
+        AppendDebugLog('REJECTION', [event.reason]);
+      }, true);
+
+      var ToggleDebugPanel = function(show) {
+        let overlay = document.getElementById('debugOverlay');
+        if (!overlay)
+          return;
+        overlay.hidden = (typeof show === 'boolean') ? !show : !overlay.hidden;
+      };
+
+      var ClearDebugLogs = function() {
+        DebugLogs.length = 0;
+        let output = document.getElementById('debugOutput');
+        if (output) output.textContent = '';
+      };
 
       HTMLSelectElement.prototype.contains = function( value ) {
         for ( var i = 0, l = this.options.length; i < l; i++ ) {
@@ -1808,6 +1956,7 @@
       };
       Module.setStatus('Downloading...');
       window.onerror = function(event) {
+        AppendDebugLog('ERROR', [event.message || event.toString(), event.filename, event.lineno, event.colno]);
         // TODO: do not warn on ok events like simulating an infinite loop or exitStatus
         // Module.setStatus('Exception thrown, see JavaScript console');
         Module.setStatus = function(text) {
