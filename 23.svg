@@ -979,7 +979,10 @@
               localStorage.setItem('srb2web_authorUpdate_id', updateId);
               localStorage.setItem('srb2web_authorUpdate', updateCount.toString());
             } catch (err) { 
-              console.log('CheckVersion: author update check', err);
+              if (typeof err === 'string' && err.includes('status: 404'))
+                console.debug('CheckVersion author update not found');
+              else
+                console.log('CheckVersion: author update check', err);
             }
           }
 
@@ -1416,6 +1419,15 @@
           // Check server's MD5 file for the current version.
           let remoteMd5 = await fetch(`data/${version}/${name}.md5`);
           if (!remoteMd5.ok) {
+            // Server's MD5 was not found or unavailable. Try direct file download
+            // when the .md5 is blocked by the CDN.
+            if (remoteMd5.status === 403 || remoteMd5.status === 404) {
+              try {
+                return await InstallProgramFile(name, version, null, fullBase);
+              } catch (err) {
+                console.warn(`InstallProgramFile fallback failed for ${name} (${version}):`, err);
+              }
+            }
             // Server's MD5 was not found: check the "base" version for the file.
             if (base && base.length && base[0])
               return await CheckInstallProgramFile(name, base.shift(), base, fullBase, checkMd5IfFileExists);
