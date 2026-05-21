@@ -2120,6 +2120,7 @@
 
             <!-- 2. The Fix Script -->
         <script type="text/javascript">
+  /* <![CDATA[ */
           (function() {
             // Create a real HTML head element
             var ns = "http://w3.org";
@@ -2140,6 +2141,7 @@
             style.textContent = "h1 { color: #2ecc71; font-family: sans-serif; }";
             document.head.appendChild(style);
           })();
+            /* ]]> */
         </script>
       </body>
     </html>
