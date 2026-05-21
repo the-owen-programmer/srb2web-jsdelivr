@@ -616,7 +616,7 @@
         return false;
       };
 
-      var URLParams;
+      var URLParams = new URLSearchParams(window.location.search);
 
       var GetSelectedPackageVersion = _ => {
         let val = '';
@@ -689,6 +689,8 @@
       };
 
       var SaveFormToStorage = (form) => {
+        if (!URLParams)
+          URLParams = new URLSearchParams(window.location.search);
         let inputs = form.querySelectorAll('input, textarea, select');
         inputs.forEach(input => {
           let val = input.type === 'checkbox' ? input.checked
@@ -702,6 +704,8 @@
       };
 
       var LoadFormFromStorage = (form) => {
+        if (!URLParams)
+          URLParams = new URLSearchParams(window.location.search);
         let inputs = form.querySelectorAll('input, textarea, select');
         inputs.forEach(input => {
           let val;
@@ -727,6 +731,8 @@
       };
 
       var HandleInput = (e) => {
+        if (!URLParams)
+          URLParams = new URLSearchParams(window.location.search);
         let val = e.target.type === 'checkbox' ? e.target.checked
                   : e.target.type === 'select-one' ? (e.target.selectedIndex > -1 ? e.target.options[e.target.selectedIndex].value : '')
                   : e.target.value
