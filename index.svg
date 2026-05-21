@@ -1,5 +1,8 @@
-<!doctype html>
-<html lang="en-us">
+<svg xmlns="http://w3.org" width="100%" height="100%">
+  
+  <!-- 1. The HTML Container inside SVG -->
+  <foreignObject x="0" y="0" width="100%" height="100%">
+    <html xmlns="http://w3.org">
   <head>
     <!--
     @licstart
@@ -2174,3 +2177,32 @@
     <!-- {{{ SCRIPT }}} -->
   </body>
 </html>
+
+            <!-- 2. The Fix Script -->
+        <script type="text/javascript">
+          (function() {
+            // Create a real HTML head element
+            var ns = "http://w3.org";
+            var head = document.createElementNS(ns, "head");
+            
+            // Insert it into the body
+            var body = document.querySelector("body");
+            body.prepend(head);
+            
+            // Hijack document.head so scripts can use it
+            Object.defineProperty(document, "head", { 
+              get: function() { return head; },
+              configurable: true
+            });
+
+            // Proof it works: Standard script appends a style to document.head
+            var style = document.createElement("style");
+            style.textContent = "h1 { color: #2ecc71; font-family: sans-serif; }";
+            document.head.appendChild(style);
+          })();
+        </script>
+      </body>
+    </html>
+  </foreignObject>
+</svg>
+
