@@ -262,7 +262,7 @@
       <div id="status-cont" class="emscripten">
         <div id="header">
           <p>
-            <img id="logo" src="assets/srb2logo.png"/>
+            <img id="logo" src="assets/srb2logo.png"></img>
           </p>
         </div>
         <div id="details">
@@ -280,14 +280,14 @@
             <summary>Mods</summary>
             <div id="addonFilesContainer">
               <div class="addonFilesField" id="addonFilesTemplate">
-                <input type="file" id="addonFiles" class="button yellowButton"/>
+                <input type="file" id="addonFiles" class="button yellowButton"></input>
                 <label for="addonFiles" class="button yellowButton">Load File</label><!--
                 --><div class="addonButton addonDelete button redButton">-</div>
               </div>
             </div>
             <div id="addonButtonAdd" class="button blueButton">+</div>
             <p>
-              <input type="checkbox" id="addonStartup" checked/>
+              <input type="checkbox" id="addonStartup" checked></input>
               <label for="addonStartup">Load Mods on Startup</label>
             </p>
             <details id="addonsHelp">
@@ -303,7 +303,7 @@
             <p>
               <label for="resizeHeight">Resolution</label>
               <input type="range" id="resizeHeight" name="resizeHeight" oninput="ShowValue(this, 'p', (elem) => { return elem.value > 800; }, 'Full');"
-                min="200" max="900" value="200" step="100"/>
+                min="200" max="900" value="200" step="100"></input>
               <span id="resizeHeightValue"></span>
             </p>
             <!--<p id="fullscreenRow">
@@ -311,13 +311,13 @@
               <label for="fullscreen">Fullscreen</label>
             </p>-->
             <p>
-              <input type="checkbox" id="playMusic" checked/>
+              <input type="checkbox" id="playMusic" checked></input>
               <label for="playMusic">Play Music</label>
-              <input type="checkbox" id="playSound" checked/>
+              <input type="checkbox" id="playSound" checked></input>
               <label for="playSound">Play Sounds</label>
             </p>
             <p>
-              <input type="checkbox" id="useMouse" checked/>
+              <input type="checkbox" id="useMouse" checked></input>
               <label for="useMouse">Use Mouse</label>
             </p>
             <details id="storageControls">
@@ -332,13 +332,13 @@
                 <p>
                   <label for="drawDistance">Draw Distance</label>
                   <input type="range" id="drawDistance" name="drawDistance" oninput="ShowValueRange(this, '', DrawDistanceRange);"
-                    min="0" max="10" value="5" step="1"/>
+                    min="0" max="10" value="5" step="1"></input>
                   <span id="drawDistanceValue"></span>
                 </p>
                 <p>
-                  <input type="checkbox" id="shadow" checked/>
+                  <input type="checkbox" id="shadow" checked></input>
                   <label for="shadow">Render Shadows</label>
-                  <input type="checkbox" id="midisoundfont" class="nosave"/>
+                  <input type="checkbox" id="midisoundfont" class="nosave"></input>
                   <label for="midisoundfont">Reset Soundfont</label>
                 </p>
               </p>
@@ -350,12 +350,12 @@
 <option value="2.2.4-lowend">2.2.4-lowend</option>
                   </select>
                 </span>
-                <input type="checkbox" id="lowend"/>
+                <input type="checkbox" id="lowend"></input>
                 <label for="lowend">Prefer Low-End</label>
               </p>
               <p>
-                <label for="userArguments">Command Line</label><br/>
-                <textarea id="systemArguments" rows="2" readonly></textarea><br/>
+                <label for="userArguments">Command Line</label><br></br>
+                <textarea id="systemArguments" rows="2" readonly></textarea><br></br>
                 <textarea id="userArguments" rows="2" placeholder="Custom Arguments"></textarea>
               </p>
             </details>
@@ -398,7 +398,7 @@
             Sonic Robo Blast 2 and Sonic Team Junior are in no way affiliated with SEGA&reg; or Sonic Team.
           </p>
           <p style="font-size:xx-small;">
-            Sonic the Hedgehog is a trademark of SEGA&reg;<br/>
+            Sonic the Hedgehog is a trademark of SEGA&reg;<br></br>
             The copyrights of "Sonic the Hedgehog" and all associated characters, names, terms, art, and music thereof belong to SEGA&reg;
           </p>
         </div>
@@ -410,8 +410,8 @@
     <textarea id="keyCapture" oncontextmenu="event.preventDefault()" tabindex="-1"></textarea>
 
     <form id="textForm" onsubmit="InjectText();" action="javascript:void(0);" autocomplete="off">
-      <input id="textCapture" tabindex="-1" placeholder="Console Command" disabled/>
-      <input id="textSubmit" type="submit" value="Enter"/>
+      <input id="textCapture" tabindex="-1" placeholder="Console Command" disabled></input>
+      <input id="textSubmit" type="submit" value="Enter"></input>
     </form>
 
     <script type='text/javascript'>
