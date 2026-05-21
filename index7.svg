@@ -261,7 +261,7 @@
         <div id="details">
           <p>
             <button id="startbtn" onclick="StartLoad()">Play</button>
-            <span hidden class="emscripten" id="status"></span>
+            <span hidden="" class="emscripten" id="status"></span>
           </p>
           <progress value="0" max="100" id="progress" hidden=1></progress>
           <p>
