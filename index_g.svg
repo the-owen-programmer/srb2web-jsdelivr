@@ -14,6 +14,106 @@
   <!-- Script block executing inside the SVG context -->
   <script type="text/javascript">
     <![CDATA[
+
+    (function() {
+  // Store all intercepted logs
+  const logHistory = [];
+
+  // Create UI container
+  const errorWindow = document.createElement('div');
+  Object.assign(errorWindow.style, {
+    position: 'fixed',
+    top: '10%',
+    left: '10%',
+    width: '80%',
+    height: '80%',
+    backgroundColor: '#1e1e1e',
+    color: '#f1f1f1',
+    zIndex: '999999',
+    fontFamily: 'monospace',
+    padding: '20px',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+    borderRadius: '8px',
+    display: 'none',
+    flexDirection: 'column'
+  });
+
+  // Create header
+  const header = document.createElement('div');
+  header.innerHTML = '<strong style="color:#ff6b6b; font-size:18px;">Application Error Detected</strong>';
+  header.style.marginBottom = '15px';
+  header.style.display = 'flex';
+  header.style.justifyContent = 'space-between';
+
+  // Create close button
+  const closeBtn = document.createElement('button');
+  closeBtn.innerText = '✕ Close';
+  Object.assign(closeBtn.style, {
+    backgroundColor: '#ff6b6b',
+    color: 'white',
+    border: 'none',
+    padding: '5px 10px',
+    cursor: 'pointer',
+    borderRadius: '4px'
+  });
+  closeBtn.onclick = () => errorWindow.style.display = 'none';
+  header.appendChild(closeBtn);
+
+  // Create log container
+  const logContainer = document.createElement('div');
+  Object.assign(logContainer.style, {
+    backgroundColor: '#111',
+    padding: '10px',
+    overflowY: 'auto',
+    flexGrow: '1',
+    borderRadius: '4px',
+    whiteSpace: 'pre-wrap'
+  });
+
+  errorWindow.appendChild(header);
+  errorWindow.appendChild(logContainer);
+  document.body.appendChild(errorWindow);
+
+  // Helper colors for UI
+  const colors = { log: '#fff', warn: '#ffdd67', error: '#ff6b6b', info: '#6be0ff' };
+
+  // Intercept function
+  function hookConsole(method) {
+    const original = console[method];
+    console[method] = function(...args) {
+      const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ');
+      
+      logHistory.push({ type: method, text: message });
+
+      if (method === 'error') {
+        showErrorWindow();
+      }
+
+      original.apply(console, args);
+    };
+  }
+
+  // Render logs to UI
+  function showErrorWindow() {
+    logContainer.innerHTML = logHistory.map(log => 
+      `<div style="color: ${colors[log.type] || '#fff'}; margin-bottom: 8px; border-bottom: 1px solid #222; padding-bottom: 4px;">
+        [${log.type.toUpperCase()}] ${log.text}
+       </div>`
+    ).join('');
+    
+    errorWindow.style.display = 'flex';
+    logContainer.scrollTop = logContainer.scrollHeight;
+  }
+
+  // Intercept standard console methods
+  ['log', 'warn', 'error', 'info', 'debug'].forEach(hookConsole);
+
+  // Catch uncaught runtime exceptions
+  window.addEventListener('error', function(event) {
+    console.error(`${event.message} at ${event.filename}:${event.lineno}`);
+  });
+})();
+
     document.addEventListener("DOMContentLoaded", () => {
       // Define the target file relative to the server origin
       const targetUrl = "https://cdn.jsdelivr.net/gh/the-owen-programmer/srb2web-jsdelivr/index.html"; 
