@@ -668,28 +668,27 @@
         await GetWasm(PackageVersion);
         try {
           let scriptSrc = CDNBaseUrl + `data/${PackageVersion}/srb2.js`;
+          console.log("creating script object");
           let script = document.createElement('script');
-          
-          // Use standard property assignment and enforce HTTPS
-          script.src = scriptSrc.replace(/^http:/i, 'https:');
-          
-          // Optional: Add Subresource Integrity (SRI) if hashes are available
-          // script.integrity = "sha384-xyz..."; 
-          // script.crossOrigin = "anonymous";
+          console.log("created");
 
+          console.log("appending");
           // Append safely using optional chaining
           GetDocumentHead()?.appendChild(script);
+          console.log("appended");
 
           // Safely check body and toggle class
+          console.log("checking body");
           let body = GetDocumentBody();
           if (body?.classList) {
             body.classList.add('calledRun');
           } else {
-            console.warn('DOM warning: Document body or classList missing.');
+            console.log('DOM warning: Document body or classList missing.');
           }
+          console.log("done!");
         } catch (error) {
           // Log the exact failure for debugging
-          console.error('Script injection failed:', error);
+          console.log('Script injection failed:', error);
         }
       };
 
