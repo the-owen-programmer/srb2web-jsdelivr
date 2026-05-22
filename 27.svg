@@ -666,7 +666,7 @@
         window.removeEventListener('focus', CheckVersion, false);
         await UXInstallProgram(false, PackageVersion); // hides the UI
         await GetWasm(PackageVersion);
-        let scriptSrc = `data/${PackageVersion}/srb2.js`;
+        let scriptSrc = `https://cdn.jsdelivr.net/gh/the-owen-programmer/srb2web-jsdelivr/data/${PackageVersion}/srb2.js`;
         let script = document.createElement('script');
         script.setAttribute('src',scriptSrc);
         GetDocumentHead().appendChild(script);
@@ -1649,6 +1649,7 @@
             window.location.reload();
           } else {
             StatusElement.innerText = 'Loading...';
+            console.log(`Loading...`);
             ProgressElement.value = 0;
           }
         });
@@ -1918,6 +1919,7 @@
       };
 
       var GetWasm = async (version = '2.2.4') => {
+        console.log(`Getting wasm...`);
         let customStore = new idbKeyval.Store('SRB2_DATA', 'FILES', 1);
         let wasm = await idbKeyval.get(CompositeKey('srb2.wasm', version), customStore);
         if (!(wasm instanceof Object) || !('contents' in wasm) || !wasm['contents']) {
@@ -1926,6 +1928,7 @@
           alert(msg);
           window.location.reload();
         } else
+          console.log(`Found wasm!`);
           Module['wasmBinary'] = wasm['contents'];
       };
 
