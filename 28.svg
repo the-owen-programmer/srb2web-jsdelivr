@@ -666,13 +666,31 @@
         window.removeEventListener('focus', CheckVersion, false);
         await UXInstallProgram(false, PackageVersion); // hides the UI
         await GetWasm(PackageVersion);
-        let scriptSrc = `https://cdn.jsdelivr.net/gh/the-owen-programmer/srb2web-jsdelivr/data/${PackageVersion}/srb2.js`;
-        let script = document.createElement('script');
-        script.setAttribute('src',scriptSrc);
-        GetDocumentHead().appendChild(script);
-        let body = GetDocumentBody();
-        if (body)
-          body.classList.add('calledRun');
+        try {
+          let scriptSrc = CDNBaseUrl + `data/${PackageVersion}/srb2.js`;
+          let script = document.createElement('script');
+          
+          // Use standard property assignment and enforce HTTPS
+          script.src = scriptSrc.replace(/^http:/i, 'https:');
+          
+          // Optional: Add Subresource Integrity (SRI) if hashes are available
+          // script.integrity = "sha384-xyz..."; 
+          // script.crossOrigin = "anonymous";
+
+          // Append safely using optional chaining
+          GetDocumentHead()?.appendChild(script);
+
+          // Safely check body and toggle class
+          let body = GetDocumentBody();
+          if (body?.classList) {
+            body.classList.add('calledRun');
+          } else {
+            console.warn('DOM warning: Document body or classList missing.');
+          }
+        } catch (error) {
+          // Log the exact failure for debugging
+          console.error('Script injection failed:', error);
+        }
       };
 
       var DrawDistanceRange = ['256','512','768','1024','1536','2048','3072','4096','6144','8192','Infinite'];
